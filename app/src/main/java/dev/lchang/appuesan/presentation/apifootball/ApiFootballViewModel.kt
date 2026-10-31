@@ -1,15 +1,28 @@
 package dev.lchang.appuesan.presentation.apifootball
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import dev.lchang.appuesan.data.local.AppDatabase
+import dev.lchang.appuesan.data.local.toEntity
 import dev.lchang.appuesan.data.remote.apifootball.Country
 import dev.lchang.appuesan.data.remote.apifootball.RetrofitInstance
+import dev.lchang.appuesan.data.remote.apifootball.Team
 import dev.lchang.appuesan.data.remote.apifootball.TeamWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class ApiFootballViewModel: ViewModel(){
+class ApiFootballViewModel(application: Application): AndroidViewModel(application){
+
+    //Room: ids de equipos favoritos guardados en SQLite
+    private val favoriteDao = AppDatabase.getInstance(application).favoriteTeamDao()
+    val favoriteIds: StateFlow<Set<Int>> = favoriteDao.getAllIds()
+        .map { it.toSet() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
     private val _countries = MutableStateFlow<List<Country>>(emptyList())
     val countries: StateFlow<List<Country>> = _countries
@@ -61,5 +74,11 @@ class ApiFootballViewModel: ViewModel(){
         loadTeamsByCountry(country)
     }
 
+    fun toggleFavorite(team: Team){
+        viewModelScope.launch {
+            if (team.id in favoriteIds.value) favoriteDao.deleteById(team.id)
+            else favoriteDao.insert(team.toEntity())
+        }
+    }
 
 }

@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import dev.lchang.appuesan.presentation.apifootball.ApiFootballScreen
 import dev.lchang.appuesan.presentation.auth.LoginScreen
 import dev.lchang.appuesan.presentation.auth.RegisterScreen
+import dev.lchang.appuesan.presentation.favorites.FavoritesScreen
 import dev.lchang.appuesan.presentation.home.HomeScreen
 import dev.lchang.appuesan.presentation.permissions.GalleryPermissionsScreen
 import dev.lchang.appuesan.presentation.realtime.FirestoreRealtimeScreen
@@ -29,6 +30,11 @@ fun AppNavGraph(){
         composable("permissions") {
             DrawerScaffold(navController) {
                 GalleryPermissionsScreen()
+            }
+        }
+        composable("favorites") {
+            DrawerScaffold(navController) {
+                FavoritesScreen()
             }
         }
         composable("realtime") {
